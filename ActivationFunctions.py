@@ -8,7 +8,7 @@ class Sigmoid:
 
     def activation(self, z):
 
-        return 1 / (1 + np.exp(-z))
+        return 1 / (1 + np.e**(-z))
 
     def activation_derivative(self, z):
 

@@ -4,13 +4,17 @@ import numpy as np
 
 class NeuralNetwork:
 
-    def __init__(self, number_of_inputs, dense_layer_shape, number_of_outputs, cost_function):
+    def __init__(self, number_of_inputs, hidden_layer_topology, number_of_outputs, cost_function):
 
         self.number_of_inputs = number_of_inputs
         self.number_of_outputs = number_of_outputs
-        self.neurons_per_layer, self.number_of_dense_layers = dense_layer_shape
-        self.layers = [None] * (self.number_of_dense_layers + 1)
+        #self.neurons_per_layer, self.number_of_hidden_layers = hidden_layer_topology
+        self.hidden_layer_topology = hidden_layer_topology
+        self.number_of_hidden_layers = len(self.hidden_layer_topology)
+        self.layers = [None] * (self.number_of_hidden_layers + 1)
         self.cost_function = cost_function()
+
+
 
         self.initialize_architecture()
 
@@ -23,17 +27,28 @@ class NeuralNetwork:
 
             NOTES:
                 - The 1st layer has the same number of input connections as the number of inputs of the system.
-                - Each dense layer has N neurons and N number of input connections.
-                - The output layer is also a layer, therefore the total number of layers is /number_of_dense_layers/ + 1.
+                - Each hidden layer has N neurons and N number of input connections.
+                - The output layer is also a layer, therefore the total number of layers is /number_of_hidden_layers/ + 1.
         """
 
+        full_topology = [self.number_of_inputs] + self.hidden_layer_topology + [self.number_of_outputs]
+
+        for i in range(self.number_of_hidden_layers + 1):
+
+            number_of_inputs = full_topology[i]
+            number_of_outputs = full_topology[i + 1]
+
+            self.layers[i] = NeuronLayer(number_of_inputs, number_of_outputs, Sigmoid)
+
+        """
         self.layers[0] = NeuronLayer(self.number_of_inputs, self.neurons_per_layer, Sigmoid)
 
-        for i in range(1, self.number_of_dense_layers):
+        for i in range(1, self.number_of_hidden_layers):
 
             self.layers[i] = NeuronLayer(self.neurons_per_layer, self.neurons_per_layer, Sigmoid)
 
-        self.layers[self.number_of_dense_layers] = NeuronLayer(self.neurons_per_layer, self.number_of_outputs, Sigmoid)
+        self.layers[self.number_of_hidden_layers] = NeuronLayer(self.neurons_per_layer, self.number_of_outputs, Sigmoid)
+        """
 
     def feed_forward(self, input_data):
 
@@ -47,7 +62,7 @@ class NeuralNetwork:
 
         self.layers[0].feed_forward(input_data)
 
-        for i in range(1, self.number_of_dense_layers + 1):
+        for i in range(1, self.number_of_hidden_layers + 1):
 
             self.layers[i].feed_forward(self.layers[i - 1].activation)
 
@@ -103,7 +118,7 @@ class NeuralNetwork:
 
         dC_dWl = dZl_dWl.T @ delta_l
 
-        for l in reversed(range(1, self.number_of_dense_layers)):
+        for l in reversed(range(1, self.number_of_hidden_layers)):
 
             dZlplus1_dAl = self.layers[l + 1].weights
             dAl_dZl = self.layers[l].activation_function.activation_derivative(self.layers[l].output)
