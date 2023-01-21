@@ -6,15 +6,23 @@ class NeuralNetwork:
 
     def __init__(self, number_of_inputs, hidden_layer_topology, number_of_outputs, cost_function):
 
+        """
+            Initializes the variables related to the architecture/topology of the network and then calls
+            /initialize_architecture/ to actually implement such architecture/topology.
+
+            NOTES:
+                - self.age refers to the number of epochs the Neural Network has run.
+        """
+
         self.number_of_inputs = number_of_inputs
         self.number_of_outputs = number_of_outputs
-        #self.neurons_per_layer, self.number_of_hidden_layers = hidden_layer_topology
+
         self.hidden_layer_topology = hidden_layer_topology
         self.number_of_hidden_layers = len(self.hidden_layer_topology)
         self.layers = [None] * (self.number_of_hidden_layers + 1)
         self.cost_function = cost_function()
 
-
+        self.age = 0
 
         self.initialize_architecture()
 
@@ -39,16 +47,6 @@ class NeuralNetwork:
             number_of_outputs = full_topology[i + 1]
 
             self.layers[i] = NeuronLayer(number_of_inputs, number_of_outputs, Sigmoid)
-
-        """
-        self.layers[0] = NeuronLayer(self.number_of_inputs, self.neurons_per_layer, Sigmoid)
-
-        for i in range(1, self.number_of_hidden_layers):
-
-            self.layers[i] = NeuronLayer(self.neurons_per_layer, self.neurons_per_layer, Sigmoid)
-
-        self.layers[self.number_of_hidden_layers] = NeuronLayer(self.neurons_per_layer, self.number_of_outputs, Sigmoid)
-        """
 
     def feed_forward(self, input_data):
 
@@ -146,3 +144,30 @@ class NeuralNetwork:
         dC_dWl = dZl_dWl.T @ delta_l
 
         self.update_weights(l, dC_dWl, learning_rate)
+
+    def get_loss(self, y, y_estimate):
+
+        """
+            Returns the current loss of the network.
+        """
+
+        return self.cost_function.cost(y, y_estimate)
+
+    def train(self, x, y, alpha=0.1, epochs=1):
+
+        """
+            Trains the network based on the input + output data passed and the learning rate (by default 0.1).
+            It also runs for the number of epochs specified (by default 1).
+        """
+
+        self.age += epochs
+
+        for epoch in range(epochs):
+
+            y_estimate = self.feed_forward(x)
+
+            self.back_propagate(x, y, alpha)
+
+            loss = self.get_loss(y, y_estimate)
+
+            print(f"Epoch: {epoch} Current Loss: {loss}")

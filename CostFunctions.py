@@ -8,16 +8,12 @@ class MeanSquaredError:
 
     def cost(self, y, y_estimate):
 
-        number_of_samples, number_of_outputs = y.shape
-
         error = (y_estimate - y)
         mean_squared_error = np.mean(error**2)
 
         return mean_squared_error
 
     def cost_derivative(self, y, y_estimate):
-
-        number_of_samples, number_of_outputs = y.shape
 
         error = (y_estimate - y)
 
